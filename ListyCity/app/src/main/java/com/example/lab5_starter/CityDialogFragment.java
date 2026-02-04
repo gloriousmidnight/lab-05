@@ -17,6 +17,7 @@ public class CityDialogFragment extends DialogFragment {
     interface CityDialogListener {
         void updateCity(City city, String title, String year);
         void addCity(City city);
+        void deleteCity(City city);
     }
     private CityDialogListener listener;
 
@@ -61,19 +62,32 @@ public class CityDialogFragment extends DialogFragment {
             city = null;}
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        return builder
-                .setView(view)
-                .setTitle("City Details")
-                .setNegativeButton("Cancel", null)
-                .setPositiveButton("Continue", (dialog, which) -> {
-                    String title = editMovieName.getText().toString();
-                    String year = editMovieYear.getText().toString();
-                    if (Objects.equals(tag, "City Details")) {
-                        listener.updateCity(city, title, year);
-                    } else {
-                        listener.addCity(new City(title, year));
-                    }
-                })
-                .create();
+        builder.setView(view)
+            .setTitle("City Details")
+            .setNegativeButton("Cancel", null);
+
+        if (Objects.equals(tag, "City Details")) {
+            //edit existing city
+            builder.setNeutralButton("Delete", (dialog, which) -> {
+                listener.deleteCity(city);
+            });
+
+            builder.setPositiveButton("Update", (dialog, which) -> {
+                //not sure why these functions are about movies, but in the interest of not
+                //breaking things and missing references, I'm just going to keep them as is
+                String cityName = editMovieName.getText().toString();
+                String province = editMovieYear.getText().toString();
+                listener.updateCity(city, cityName, province);
+            });
+        } else {
+            //adding a new city
+            builder.setPositiveButton("Add", (dialog, which) -> {
+                String cityName = editMovieName.getText().toString();
+                String province = editMovieYear.getText().toString();
+                listener.addCity(new City(cityName, province));
+            });
+        }
+
+        return builder.create();
     }
 }
